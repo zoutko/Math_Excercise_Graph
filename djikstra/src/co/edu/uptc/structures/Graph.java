@@ -225,7 +225,6 @@ public class Graph<T> {
         return result.toString();
     }
 
-    // Nuevo método público para obtener la lista de adyacencias de un vértice
     public SimpleList<Road<T>> getAdjacentsOf(T data) {
         Vertex<T> v = searchVertex(data);
         if (v != null) {
