@@ -1,15 +1,13 @@
 package co.edu.uptc.test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
-
 import co.edu.uptc.model.GraphModel;
 import co.edu.uptc.structures.Graph;
 import co.edu.uptc.structures.Road;
 import co.edu.uptc.structures.SimpleList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 public class TestGraph {
 
@@ -20,39 +18,56 @@ public class TestGraph {
 
     public static void main(String[] args) {
         Scanner console = new Scanner(System.in);
-        System.out.println("Ingrese el nodo de inicio (ej A): ");
-        String start = console.nextLine();
-        System.out.println("Ingrese el nodo de destino (ej G): ");
-        String end = console.nextLine();
-        if (args.length >= 2) {
-            start = args[0];
-            end = args[1];
-        }
-
         Graph<String> g = GraphModel.createGraph();
 
-        SimpleList<String> recorrido = g.showValues(start);
-        System.out.print("Camino recorrido (DFS) desde " + start + ": ");
-        printSimpleList(recorrido);
+        while (true) {
+            System.out.println("\n=== MENU DE GRAFOS ===");
+            System.out.println("1. Dijkstra");
+            System.out.println("2. Kruskal minimo");
+            System.out.println("3. Kruskal maximo");
+            System.out.println("4. Salir");
+            System.out.print("Seleccione una opcion: ");
 
-        System.out.println("\nRuta más corta (Dijkstra) de " + start + " a " + end + ":");
-        System.out.println(g.dijkstra(start, end));
+            int option = Integer.parseInt(console.nextLine());
 
-        PathResult best = new PathResult();
-        List<String> current = new ArrayList<>();
-        Set<String> visited = new HashSet<>();
+            switch (option) {
+                case 1: {
+                    System.out.print("Ingrese el nodo de inicio (ej A): ");
+                    String start = console.nextLine();
+                    System.out.print("Ingrese el nodo de destino (ej G): ");
+                    String end = console.nextLine();
 
-        visited.add(start);
-        current.add(start);
-        dfsLongest(g, start, end, visited, current, 0, best);
-
-        if (best.weight == Integer.MIN_VALUE) {
-            System.out.println("\nNo existe camino simple de " + start + " a " + end + ".");
-        } else {
-            System.out.println("\nRuta más larga simple de " + start + " a " + end + ":");
-            System.out.println("Camino: " + String.join(" -> ", best.path));
-            System.out.println("Costo Total: " + best.weight);
+                    System.out.println("\nRuta mas corta (Dijkstra) de " + start + " a " + end + ":");
+                    System.out.println(g.dijkstra(start, end));
+                    break;
+                }
+                case 2: {
+                    System.out.println("\nArbol de expansion minima (Kruskal):");
+                    printKruskalTree(g.kruskalMin());
+                    break;
+                }
+                case 3: {
+                    System.out.println("\nArbol de expansion maxima (Kruskal):");
+                    printKruskalTree(g.kruskalMax());
+                    break;
+                }
+                case 4:
+                    System.out.println("Saliendo...");
+                    console.close();
+                    return;
+                default:
+                    System.out.println("Opcion invalida.");
+            }
         }
+    }
+
+    private static void printKruskalTree(SimpleList<Road<String>> tree) {
+        int total = 0;
+        for (Road<String> road : tree) {
+            System.out.println(road.getAdjacent() + " | peso: " + road.getWeight());
+            total += road.getWeight();
+        }
+        System.out.println("Peso total: " + total);
     }
 
     private static void dfsLongest(Graph<String> g, String currentNode, String target, Set<String> visited,
