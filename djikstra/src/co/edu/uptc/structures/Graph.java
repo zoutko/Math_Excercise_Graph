@@ -234,4 +234,144 @@ public class Graph<T> {
         return new SimpleList<>();
     }
 
+    public SimpleList<Road<T>> kruskalMin() {
+    return kruskal(false);
+    }
+
+    public SimpleList<Road<T>> kruskalMax() {
+        return kruskal(true);
+    }
+
+    private SimpleList<Road<T>> kruskal(boolean maximum) {
+        SimpleList<Road<T>> result = new SimpleList<>();
+        SimpleList<EdgeData<T>> edges = getUniqueEdges();
+        SimpleList<Vertex<T>> verts = getAllVertices();
+
+        sortEdges(edges, maximum);
+
+        UnionFind<T> uf = new UnionFind<>(verts);
+
+        for (EdgeData<T> e : edges) {
+            if (uf.union(e.u, e.v)) {
+                result.add(new Road<>(e.v, e.w));
+                if (result.size() == verts.size() - 1) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+        private static class EdgeData<E> {
+        E u;
+        E v;
+        int w;
+
+        EdgeData(E u, E v, int w) {
+            this.u = u;
+            this.v = v;
+            this.w = w;
+        }
+    }
+
+    private class UnionFind<E> {
+        private SimpleList<E> parent = new SimpleList<>();
+        private SimpleList<Integer> rank = new SimpleList<>();
+
+        UnionFind(SimpleList<Vertex<E>> verticesList) {
+            for (Vertex<E> v : verticesList) {
+                parent.add(v.getValue());
+                rank.add(0);
+            }
+        }
+
+        private int indexOf(E value) {
+            for (int i = 0; i < parent.size(); i++) {
+                if (parent.get(i).equals(value)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private E find(E value) {
+            int i = indexOf(value);
+            if (i == -1) return null;
+
+            E p = parent.get(i);
+            if (!p.equals(value)) {
+                E root = find(p);
+                parent.set(i, root);
+                return root;
+            }
+            return p;
+        }
+
+        boolean union(E a, E b) {
+            E rootA = find(a);
+            E rootB = find(b);
+
+            if (rootA == null || rootB == null) return false;
+            if (rootA.equals(rootB)) return false;
+
+            int iA = indexOf(rootA);
+            int iB = indexOf(rootB);
+
+            int rankA = rank.get(iA);
+            int rankB = rank.get(iB);
+
+            if (rankA < rankB) {
+                parent.set(iA, rootB);
+            } else if (rankA > rankB) {
+                parent.set(iB, rootA);
+            } else {
+                parent.set(iB, rootA);
+                rank.set(iA, rankA + 1);
+            }
+            return true;
+        }
+    }
+
+    private SimpleList<EdgeData<T>> getUniqueEdges() {
+        SimpleList<EdgeData<T>> edges = new SimpleList<>();
+
+        for (Vertex<T> v : vertices) {
+            for (Road<T> r : v.getAdjacents()) {
+                T a = v.getValue();
+                T b = r.getAdjacent();
+
+                if (!existsEdge(edges, a, b) && !existsEdge(edges, b, a)) {
+                    edges.add(new EdgeData<>(a, b, r.getWeight()));
+                }
+            }
+        }
+        return edges;
+    }
+
+    private boolean existsEdge(SimpleList<EdgeData<T>> edges, T u, T v) {
+        for (EdgeData<T> e : edges) {
+            if (e.u.equals(u) && e.v.equals(v)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void sortEdges(SimpleList<EdgeData<T>> edges, boolean maximum) {
+        for (int i = 0; i < edges.size() - 1; i++) {
+            for (int j = i + 1; j < edges.size(); j++) {
+                int wi = edges.get(i).w;
+                int wj = edges.get(j).w;
+
+                boolean swap = maximum ? wi < wj : wi > wj;
+
+                if (swap) {
+                    EdgeData<T> temp = edges.get(i);
+                    edges.set(i, edges.get(j));
+                    edges.set(j, temp);
+                }
+            }
+        }
+    }
 }
