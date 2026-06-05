@@ -234,36 +234,34 @@ public class Graph<T> {
         return new SimpleList<>();
     }
 
-    public SimpleList<Road<T>> kruskalMin() {
-    return kruskal(false);
+    public SimpleList<MstEdge<T>> kruskalMin() {
+        return kruskal(false);
     }
 
-    public SimpleList<Road<T>> kruskalMax() {
+    public SimpleList<MstEdge<T>> kruskalMax() {
         return kruskal(true);
     }
 
-    private SimpleList<Road<T>> kruskal(boolean maximum) {
-        SimpleList<Road<T>> result = new SimpleList<>();
+    private SimpleList<MstEdge<T>> kruskal(boolean maximum) {
+        SimpleList<MstEdge<T>> result = new SimpleList<>();
         SimpleList<EdgeData<T>> edges = getUniqueEdges();
         SimpleList<Vertex<T>> verts = getAllVertices();
 
         sortEdges(edges, maximum);
-
         UnionFind<T> uf = new UnionFind<>(verts);
 
         for (EdgeData<T> e : edges) {
             if (uf.union(e.u, e.v)) {
-                result.add(new Road<>(e.v, e.w));
+                result.add(new MstEdge<>(e.u, e.v, e.w));
                 if (result.size() == verts.size() - 1) {
                     break;
                 }
             }
         }
-
         return result;
     }
 
-        private static class EdgeData<E> {
+    private static class EdgeData<E> {
         E u;
         E v;
         int w;
@@ -276,58 +274,51 @@ public class Graph<T> {
     }
 
     private class UnionFind<E> {
-        private SimpleList<E> parent = new SimpleList<>();
+        private SimpleList<E> elements = new SimpleList<>();
+        private SimpleList<Integer> parent = new SimpleList<>();
         private SimpleList<Integer> rank = new SimpleList<>();
 
         UnionFind(SimpleList<Vertex<E>> verticesList) {
             for (Vertex<E> v : verticesList) {
-                parent.add(v.getValue());
+                elements.add(v.getValue());
+                parent.add(elements.size() - 1);
                 rank.add(0);
             }
         }
 
         private int indexOf(E value) {
-            for (int i = 0; i < parent.size(); i++) {
-                if (parent.get(i).equals(value)) {
-                    return i;
-                }
+            for (int i = 0; i < elements.size(); i++) {
+                if (elements.get(i).equals(value)) return i;
             }
             return -1;
         }
 
-        private E find(E value) {
-            int i = indexOf(value);
-            if (i == -1) return null;
-
-            E p = parent.get(i);
-            if (!p.equals(value)) {
-                E root = find(p);
-                parent.set(i, root);
-                return root;
+        private int findIndex(int i) {
+            if (parent.get(i) != i) {
+                parent.set(i, findIndex(parent.get(i)));
             }
-            return p;
+            return parent.get(i);
         }
 
         boolean union(E a, E b) {
-            E rootA = find(a);
-            E rootB = find(b);
+            int ia = indexOf(a);
+            int ib = indexOf(b);
+            if (ia == -1 || ib == -1) return false;
 
-            if (rootA == null || rootB == null) return false;
-            if (rootA.equals(rootB)) return false;
+            int ra = findIndex(ia);
+            int rb = findIndex(ib);
+            if (ra == rb) return false;
 
-            int iA = indexOf(rootA);
-            int iB = indexOf(rootB);
-
-            int rankA = rank.get(iA);
-            int rankB = rank.get(iB);
+            int rankA = rank.get(ra);
+            int rankB = rank.get(rb);
 
             if (rankA < rankB) {
-                parent.set(iA, rootB);
+                parent.set(ra, rb);
             } else if (rankA > rankB) {
-                parent.set(iB, rootA);
+                parent.set(rb, ra);
             } else {
-                parent.set(iB, rootA);
-                rank.set(iA, rankA + 1);
+                parent.set(rb, ra);
+                rank.set(ra, rankA + 1);
             }
             return true;
         }
@@ -363,7 +354,6 @@ public class Graph<T> {
             for (int j = i + 1; j < edges.size(); j++) {
                 int wi = edges.get(i).w;
                 int wj = edges.get(j).w;
-
                 boolean swap = maximum ? wi < wj : wi > wj;
 
                 if (swap) {

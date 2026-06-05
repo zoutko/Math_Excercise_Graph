@@ -4,6 +4,7 @@ import co.edu.uptc.model.GraphModel;
 import co.edu.uptc.structures.Graph;
 import co.edu.uptc.structures.Road;
 import co.edu.uptc.structures.SimpleList;
+import co.edu.uptc.structures.MstEdge;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -42,12 +43,12 @@ public class TestGraph {
                     break;
                 }
                 case 2: {
-                    System.out.println("\nArbol de expansion minima (Kruskal):");
+                    System.out.println("\nÁrbol de expansión mínima (Kruskal):");
                     printKruskalTree(g.kruskalMin());
                     break;
                 }
                 case 3: {
-                    System.out.println("\nArbol de expansion maxima (Kruskal):");
+                    System.out.println("\nÁrbol de expansión máxima (Kruskal):");
                     printKruskalTree(g.kruskalMax());
                     break;
                 }
@@ -61,11 +62,11 @@ public class TestGraph {
         }
     }
 
-    private static void printKruskalTree(SimpleList<Road<String>> tree) {
+    private static void printKruskalTree(SimpleList<MstEdge<String>> tree) {
         int total = 0;
-        for (Road<String> road : tree) {
-            System.out.println(road.getAdjacent() + " | peso: " + road.getWeight());
-            total += road.getWeight();
+        for (MstEdge<String> edge : tree) {
+            System.out.println(edge.getFrom() + " - " + edge.getTo() + " (" + edge.getWeight() + ")");
+            total += edge.getWeight();
         }
         System.out.println("Peso total: " + total);
     }

@@ -32,7 +32,7 @@ public class GraphModel {
         g.addArc("C", "E", 1);
 
         g.addArc("D", "H", 14);
-        g.addArc("D", "E", 8);
+        g.addArc("D", "E", 12);
 
         g.addArc("E", "G", 15);
 
